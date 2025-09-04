@@ -289,8 +289,8 @@ const { conversation } = useConversation();
 const conversationId = await conversation.startSession({
   conversationToken,
   connectionType: "webrtc",
-  inputDeviceId: '<new-input-device-id>',
-  outputDeviceId: '<new-input-device-id>',
+  inputDeviceId: "<new-input-device-id>",
+  outputDeviceId: "<new-input-device-id>",
 });
 ```
 
@@ -490,6 +490,32 @@ This is helpful to conditionally show the feedback button in your UI.
 const { canSendFeedback } = useConversation();
 console.log(canSendFeedback); // boolean
 ```
+
+## CSP issues
+
+If your application has a tight Content Security Policy and does not allow data: or blob: in the `script-src`, you self-host the needed files in the public folder.
+
+eg.
+
+```
+   cp node_modules/@elevenlabs/client/dist/worklets/*.worklet.js public/worklets/
+```
+
+This way you can allow the scripts directly with:
+
+(note: hashes may be out of date)
+
+```
+Content-Security-Policy: script-src 'self' 'sha256-7XwSCu/JjsIGhjK+X2oXBeE26icLH2yc68n0OkeGlRs=' 'sha256-nNc4EV6CoBdgG6gRpdDxYJ0lneoWKP3GuUGZT1iuBZE=';
+```
+
+For blob: or data, the CSP is as follows:
+
+```
+Content-Security-Policy: script-src 'self' 'blob:' 'data:';
+```
+
+Where blob: and data: are enabled for any URL on the web (they cannot be whitelisted specifically)
 
 ## Development
 

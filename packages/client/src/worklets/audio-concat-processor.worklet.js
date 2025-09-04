@@ -1,11 +1,4 @@
-import { createWorkletModuleLoader } from "./createWorkletModuleLoader";
-import { WORKLET_HASHES } from "../worklet-hashes";
-
-// Install the file in your public directory to avoid blob: and data: usage
-const DEFAULT_WORKLET_URL = "/worklets/audio-concat-processor.worklet.js";
-
-// Fallback source code for blob: URL approach
-const FALLBACK_SOURCE_CODE = `/*
+/*
  * ulaw decoding logic taken from the wavefile library
  * https://github.com/rochars/wavefile/blob/master/lib/codecs/mulaw.js
  */
@@ -95,11 +88,4 @@ class AudioConcatProcessor extends AudioWorkletProcessor {
   }
 }
 
-registerProcessor("audio-concat-processor", AudioConcatProcessor);`;
-
-export const loadAudioConcatProcessor = createWorkletModuleLoader(
-  "audio-concat-processor",
-  DEFAULT_WORKLET_URL,
-  WORKLET_HASHES["audio-concat-processor"],
-  FALLBACK_SOURCE_CODE
-);
+registerProcessor("audio-concat-processor", AudioConcatProcessor);

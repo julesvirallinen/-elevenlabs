@@ -1,11 +1,4 @@
-import { createWorkletModuleLoader } from "./createWorkletModuleLoader";
-import { WORKLET_HASHES } from "../worklet-hashes";
-
-// Default URL for the raw audio processor worklet
-const DEFAULT_WORKLET_URL = "/worklets/raw-audio-processor.worklet.js";
-
-// Fallback source code for blob: URL approach
-const FALLBACK_SOURCE_CODE = `/*
+/*
  * ulaw encoding logic taken from the wavefile library
  * https://github.com/rochars/wavefile/blob/master/lib/codecs/mulaw.js
  */
@@ -127,11 +120,4 @@ class RawAudioProcessor extends AudioWorkletProcessor {
     return true; // Continue processing
   }
 }
-registerProcessor("raw-audio-processor", RawAudioProcessor);`;
-
-export const loadRawAudioProcessor = createWorkletModuleLoader(
-  "raw-audio-processor",
-  DEFAULT_WORKLET_URL,
-  WORKLET_HASHES["raw-audio-processor"],
-  FALLBACK_SOURCE_CODE
-);
+registerProcessor("raw-audio-processor", RawAudioProcessor);

@@ -17,8 +17,10 @@
   },
   "scripts": {
     "generate-version": "printf \"// This file is auto-generated during build\\nexport const PACKAGE_VERSION = \\\"%s\\\";\\n\" \"$npm_package_version\" > src/version.ts",
-    "prebuild": "pnpm run generate-version",
-    "build": "BROWSERSLIST_ENV=modern microbundle --jsx React.createElement --jsxFragment React.Fragment --jsxImportSource react src/index.ts",
+    "generate-worklet-hashes": "node scripts/generate-worklet-hashes.js",
+    "prebuild": "pnpm run generate-version && pnpm run generate-worklet-hashes",
+    "copy-worklets": "mkdir -p dist/worklets && cp src/worklets/*.worklet.js dist/worklets/",
+    "build": "BROWSERSLIST_ENV=modern microbundle --jsx React.createElement --jsxFragment React.Fragment --jsxImportSource react src/index.ts && pnpm run copy-worklets",
     "clean": "rm -rf ./dist",
     "dev": "pnpm run clean && pnpm run generate-version && BROWSERSLIST_ENV=development microbundle --jsx React.createElement --jsxFragment React.Fragment --jsxImportSource react src/index.ts -w -f modern",
     "lint": "pnpm run lint:ts && pnpm run lint:es && pnpm run lint:prettier",
