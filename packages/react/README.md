@@ -498,7 +498,7 @@ If your application has a tight Content Security Policy and does not allow data:
 eg.
 
 ```
-   cp node_modules/@elevenlabs/client/dist/worklets/*.worklet.js public/worklets/
+   cp node_modules/@elevenlabs/client/dist/worklets/*.worklet.js public/elevenlabs/
 ```
 
 This way you can allow the scripts directly with:

@@ -90,7 +90,7 @@ export function createWorkletModuleLoader(
 1. Browser doesn't support AudioWorklets (requires Chrome 64+, Firefox 76+, Safari 14.1+)
 2. Content Security Policy blocks 'blob:' and 'data:' URLs (copy worklet files to public directory)
 
-To fix CSP issues, copy worklet files: cp node_modules/@elevenlabs/client/dist/worklets/*.js public/worklets/`
+To fix CSP issues, copy worklet files: cp node_modules/@elevenlabs/client/dist/worklets/*.js public/elevenlabs/`
       );
     }
   };
