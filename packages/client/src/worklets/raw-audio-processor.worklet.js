@@ -1,8 +1,3 @@
-/*
- * ulaw encoding logic taken from the wavefile library
- * https://github.com/rochars/wavefile/blob/master/lib/codecs/mulaw.js
- */
-
 const BIAS = 0x84;
 const CLIP = 32635;
 const encodeTable = [

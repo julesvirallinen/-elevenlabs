@@ -1,8 +1,3 @@
-/*
- * ulaw decoding logic taken from the wavefile library
- * https://github.com/rochars/wavefile/blob/master/lib/codecs/mulaw.js
- */
-
 const decodeTable = [0,132,396,924,1980,4092,8316,16764];
 
 export function decodeSample(muLawSample) {

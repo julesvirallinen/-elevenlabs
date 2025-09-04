@@ -503,10 +503,10 @@ eg.
 
 This way you can allow the scripts directly with:
 
-(note: hashes may be out of date)
+Get the hashes from `@elevenlabs/client/src/worklet-hashes.d.ts`
 
 ```
-Content-Security-Policy: script-src 'self' 'sha256-7XwSCu/JjsIGhjK+X2oXBeE26icLH2yc68n0OkeGlRs=' 'sha256-nNc4EV6CoBdgG6gRpdDxYJ0lneoWKP3GuUGZT1iuBZE=';
+Content-Security-Policy: script-src 'self' 'HASH1' "HASH2;
 ```
 
 For blob: or data, the CSP is as follows:

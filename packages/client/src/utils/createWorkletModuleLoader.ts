@@ -44,12 +44,35 @@ export function createWorkletModuleLoader(
       return worklet.addModule(cachedUrl);
     }
 
-    /** Blob and data introduce XSS vulnerabilities when allowed in CSP, allow for self-hosted scripts for worklets in public directory */
+    // Try blob URL first (maximum compatibility)
+    const blob = new Blob([fallbackSourceCode], {
+      type: "application/javascript",
+    });
+    const blobURL = URL.createObjectURL(blob);
+    try {
+      await worklet.addModule(blobURL);
+      URLCache.set(name, blobURL);
+      return;
+    } catch (blobError) {
+      URL.revokeObjectURL(blobURL);
+    }
+
+    try {
+      // Try data URL (for Safari iframe compatibility)
+      const base64 = btoa(fallbackSourceCode);
+      const moduleURL = `data:application/javascript;base64,${base64}`;
+      await worklet.addModule(moduleURL);
+      URLCache.set(name, moduleURL);
+      return;
+    } catch (dataError) {
+      // Continue to static file fallback
+    }
+
+    // Final fallback: static file with hash validation (CSP-safe)
     try {
       await fetchAndValidateWorklet(staticUrl, expectedHash);
       await worklet.addModule(staticUrl);
       URLCache.set(name, staticUrl);
-      return;
     } catch (staticError) {
       const errorMessage =
         staticError instanceof Error
@@ -60,32 +83,14 @@ export function createWorkletModuleLoader(
       if (errorMessage.includes("hash mismatch")) {
         throw staticError;
       }
-    }
 
-    // Fall back to blob URL approach
-    const blob = new Blob([fallbackSourceCode], {
-      type: "application/javascript",
-    });
-    const blobURL = URL.createObjectURL(blob);
-    try {
-      await worklet.addModule(blobURL);
-      URLCache.set(name, blobURL);
-      return;
-    } catch {
-      URL.revokeObjectURL(blobURL);
-    }
-
-    try {
-      // Attempting to start a conversation in Safari inside an iframe will
-      // throw a CORS error because the blob:// protocol is considered
-      // cross-origin. In such cases, fall back to using a base64 data URL:
-      const base64 = btoa(fallbackSourceCode);
-      const moduleURL = `data:application/javascript;base64,${base64}`;
-      await worklet.addModule(moduleURL);
-      URLCache.set(name, moduleURL);
-    } catch (error) {
+      // All methods failed - provide comprehensive error message
       throw new Error(
-        `Failed to load the ${name} worklet module. Make sure the browser supports AudioWorklets.`
+        `Failed to load the ${name} worklet module. Possible causes:
+1. Browser doesn't support AudioWorklets (requires Chrome 64+, Firefox 76+, Safari 14.1+)
+2. Content Security Policy blocks 'blob:' and 'data:' URLs (copy worklet files to public directory)
+
+To fix CSP issues, copy worklet files: cp node_modules/@elevenlabs/client/dist/worklets/*.js public/worklets/`
       );
     }
   };

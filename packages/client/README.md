@@ -441,10 +441,10 @@ eg.
 
 This way you can allow the scripts directly with:
 
-(note: hashes may be out of date)
+Get the hashes from `@elevenlabs/client/src/worklet-hashes.d.ts`
 
 ```
-Content-Security-Policy: script-src 'self' 'sha256-7XwSCu/JjsIGhjK+X2oXBeE26icLH2yc68n0OkeGlRs=' 'sha256-nNc4EV6CoBdgG6gRpdDxYJ0lneoWKP3GuUGZT1iuBZE=';
+Content-Security-Policy: script-src 'self' 'HASH1' "HASH2;
 ```
 
 For blob: or data, the CSP is as follows:
@@ -464,3 +464,7 @@ Please, refer to the README.md file in the root of this repository.
 Please, create an issue first to discuss the proposed changes. Any contributions are welcome!
 
 Remember, if merged, your code will be used as part of a MIT licensed project. By submitting a Pull Request, you are giving your consent for your code to be integrated into this library.
+
+## Acknowledgments
+
+The ulaw encoding logic used in the AudioWorklet processors is adapted from the [wavefile library](https://github.com/rochars/wavefile/blob/master/lib/codecs/mulaw.js) by Rafael da Silva Rocha.
