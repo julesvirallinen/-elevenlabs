@@ -429,6 +429,32 @@ await conversation.changeOutputDevice({
 
 **Note:** Device switching only works for voice conversations. If no specific `deviceId` is provided, the browser will use its default device selection. You can enumerate available devices using the [MediaDevices.enumerateDevices()](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/enumerateDevices) API.
 
+## CSP issues
+
+If your application has a tight Content Security Policy and does not allow data: or blob: in the `script-src`, you self-host the needed files in the public folder.
+
+eg.
+
+```
+   cp node_modules/@elevenlabs/client/dist/worklets/*.worklet.js public/elevenlabs/
+```
+
+This way you can allow the scripts directly with:
+
+Get the hashes from `@elevenlabs/client/src/worklet-hashes.d.ts`
+
+```
+Content-Security-Policy: script-src 'self' 'HASH1' "HASH2;
+```
+
+For blob: or data, the CSP is as follows:
+
+```
+Content-Security-Policy: script-src 'self' 'blob:' 'data:';
+```
+
+Where blob: and data: are enabled for any URL on the web (they cannot be whitelisted specifically)
+
 ## Development
 
 Please, refer to the README.md file in the root of this repository.
@@ -438,3 +464,7 @@ Please, refer to the README.md file in the root of this repository.
 Please, create an issue first to discuss the proposed changes. Any contributions are welcome!
 
 Remember, if merged, your code will be used as part of a MIT licensed project. By submitting a Pull Request, you are giving your consent for your code to be integrated into this library.
+
+## Acknowledgments
+
+The ulaw encoding logic used in the AudioWorklet processors is adapted from the [wavefile library](https://github.com/rochars/wavefile/blob/master/lib/codecs/mulaw.js) by Rafael da Silva Rocha.
