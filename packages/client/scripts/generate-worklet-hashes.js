@@ -69,29 +69,8 @@ export const WORKLET_HASHES = ${JSON.stringify(hashes, null, 2)} as const;
  */
 export const WORKLET_SOURCES = ${JSON.stringify(workletSources, null, 2)} as const;
 
-/**
- * Array of all worklet hashes for easy CSP configuration
- * Example CSP: script-src 'self' ${hashList.map(h => `'${h}'`).join(' ')};
- */
-export const WORKLET_HASH_LIST = ${JSON.stringify(hashList, null, 2)} as const;
-
-/**
- * Generate a CSP-compatible script-src directive that includes worklet hashes
- * @param additionalSources Additional sources to include (e.g., 'self', 'unsafe-inline')
- * @returns CSP script-src directive string
- */
-export function generateScriptSrcDirective(additionalSources: string[] = ["'self'"]): string {
-  const sources = [...additionalSources, ...WORKLET_HASH_LIST.map(hash => \`'\${hash}'\`)];
-  return \`script-src \${sources.join(' ')}\`;
-}
 `;
 
 const outputPath = join(packagesDir, 'src', 'worklet-hashes.ts');
 writeFileSync(outputPath, tsContent, 'utf8');
 
-console.log(`\n✅ Generated worklet hashes file: ${outputPath}`);
-console.log('\n📋 For CSP-safe static file loading, add these hashes to script-src:');
-console.log(`   ${hashList.map(h => `'${h}'`).join(' ')}`);
-console.log('\n💡 Or use the helper function:');
-console.log('   import { generateScriptSrcDirective } from "@elevenlabs/client";');
-console.log('   const csp = generateScriptSrcDirective();');
