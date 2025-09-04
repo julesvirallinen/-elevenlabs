@@ -30,13 +30,6 @@ export { postOverallFeedback } from "./utils/postOverallFeedback";
 export { VoiceConversation } from "./VoiceConversation";
 export { TextConversation } from "./TextConversation";
 
-// CSP-related exports for worklet hash configuration
-export {
-  WORKLET_HASHES,
-  WORKLET_HASH_LIST,
-  generateScriptSrcDirective,
-} from "./worklet-hashes";
-
 export class Conversation extends BaseConversation {
   public static startSession(options: PartialOptions): Promise<Conversation> {
     return options.textOnly
