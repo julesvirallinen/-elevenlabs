@@ -529,11 +529,11 @@ export default {
     viteStaticCopy({
       targets: [
         {
-          src: require.resolve('@elevenlabs/client')/dist/worklets/audio-concat-processor.js',
+          src: path.join(require.resolve('@elevenlabs/client'), 'dist/worklets/audio-concat-processor.js'),
           dest: 'dist',
         },
         {
-          src: require.resolve('@elevenlabs/client')/dist/worklets/raw-audio-processor.js',
+          src: path.join(require.resolve('@elevenlabs/client'), 'dist/worklets/raw-audio-processor.js'),
           dest: 'dist',
         },
       ],
