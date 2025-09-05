@@ -16,6 +16,7 @@ import type {
   VadScoreEvent,
 } from "./utils/events";
 import type { InputConfig } from "./utils/input";
+import type { OutputConfig } from "./utils/output";
 
 export type Role = "user" | "ai";
 
@@ -30,12 +31,14 @@ export type Status =
 export type Options = SessionConfig &
   Callbacks &
   ClientToolsConfig &
-  InputConfig;
+  InputConfig &
+  OutputConfig;
 
 export type PartialOptions = SessionConfig &
   Partial<Callbacks> &
   Partial<ClientToolsConfig> &
   Partial<InputConfig> &
+  Partial<OutputConfig> &
   Partial<FormatConfig>;
 
 export type ClientToolsConfig = {
