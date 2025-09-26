@@ -1,8 +1,10 @@
-# ElevenLabs React Library
+![hero](../../assets/hero.png)
 
-An SDK library for using ElevenLabs in React based applications. If you're looking for a Node.js library, please refer to the [ElevenLabs Node.js Library](https://www.npmjs.com/package/elevenlabs).
+# ElevenLabs Agents React SDK
 
-> Note that this library is launching to primarily support Conversational AI. The support for speech synthesis and other more generic use cases is planned for the future.
+Build multimodal agents with the [ElevenLabs Agents platform](https://elevenlabs.io/docs/agents-platform/overview).
+
+An SDK library for using ElevenLabs Agents. If you're looking for a Node.js library for other audio APIs, please refer to the [ElevenLabs Node.js Library](https://www.npmjs.com/package/@elevenlabs/elevenlabs-js).
 
 ![LOGO](https://github.com/elevenlabs/elevenlabs-python/assets/12028621/21267d89-5e82-4e7e-9c81-caf30b237683)
 [![Discord](https://badgen.net/badge/black/ElevenLabs/icon?icon=discord&label)](https://discord.gg/elevenlabs)
@@ -177,6 +179,25 @@ const conversation = useConversation({
 });
 ```
 
+#### Data Residency
+
+The React SDK supports data residency for compliance with regional regulations. You can specify the server location when initializing the conversation:
+
+```ts
+const conversation = useConversation({
+  serverLocation: "eu-residency", // "us", "global", "eu-residency", or "in-residency"
+});
+```
+
+Available locations:
+
+- `"us"` (default) - United States servers
+- `"global"` - Global servers (same as US)
+- `"eu-residency"` - European Union residency servers
+- `"in-residency"` - India residency servers
+
+The SDK automatically routes both WebSocket and WebRTC connections to the appropriate regional servers based on your selection. This ensures that all conversation data, including audio streams, remain within the specified geographic region.
+
 #### Methods
 
 ##### startConversation
@@ -289,8 +310,8 @@ const { conversation } = useConversation();
 const conversationId = await conversation.startSession({
   conversationToken,
   connectionType: "webrtc",
-  inputDeviceId: '<new-input-device-id>',
-  outputDeviceId: '<new-input-device-id>',
+  inputDeviceId: "<new-input-device-id>",
+  outputDeviceId: "<new-input-device-id>",
 });
 ```
 
@@ -489,6 +510,58 @@ This is helpful to conditionally show the feedback button in your UI.
 ```js
 const { canSendFeedback } = useConversation();
 console.log(canSendFeedback); // boolean
+```
+
+## CSP compliance
+
+If your application has a tight Content Security Policy and does not allow data: or blob: in the `script-src` (w3.org/TR/CSP2#source-list-guid-matching), you self-host the needed files in the public folder.
+
+Whitelisting these values is not recommended w3.org/TR/CSP2#source-list-guid-matching.
+
+Add the worklet files to your public folder eg `public/elevenlabs`.
+
+```
+@elevenlabs/client/scripts/
+```
+
+Then call start with
+
+```ts
+      await conversation.startSession({
+...
+        workletPaths: {
+          'rawAudioProcessor': '/elevenlabs/rawAudioProcessor.worklet.js',
+          'audioConcatProcessor':
+            '/elevenlabs/audioConcatProcessor.worklet.js',
+        },
+      });
+```
+
+It is recommended to update the scripts with a build script like
+
+```js
+import { viteStaticCopy } from 'vite-plugin-static-copy'
+import { createRequire } from 'node:module';
+import path from 'path';
+
+const require = createRequire(import.meta.url);
+
+export default {
+  plugins: [
+    viteStaticCopy({
+      targets: [
+        {
+          src: require.resolve('@elevenlabs/client')/dist/worklets/audioConcatProcessor.js',
+          dest: 'dist',
+        },
+        {
+          src: require.resolve('@elevenlabs/client')/dist/worklets/rawAudioProcessor.js',
+          dest: 'dist',
+        },
+      ],
+    }),
+  ],
+}
 ```
 
 ## Development

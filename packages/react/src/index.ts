@@ -5,6 +5,8 @@ import {
   type Options,
   type ClientToolsConfig,
   type InputConfig,
+  type AudioWorkletConfig,
+  type OutputConfig,
   type FormatConfig,
   type Mode,
   type Status,
@@ -53,6 +55,17 @@ export function getOriginForLocation(location: Location): string {
   return originMap[location];
 }
 
+export function getLivekitUrlForLocation(location: Location): string {
+  const livekitUrlMap: Record<Location, string> = {
+    us: "wss://livekit.rtc.elevenlabs.io",
+    "eu-residency": "wss://livekit.rtc.eu.residency.elevenlabs.io",
+    "in-residency": "wss://livekit.rtc.in.residency.elevenlabs.io",
+    global: "wss://livekit.rtc.elevenlabs.io",
+  };
+
+  return livekitUrlMap[location];
+}
+
 export type {
   Role,
   Mode,
@@ -73,6 +86,8 @@ export type HookOptions = Partial<
     HookCallbacks &
     ClientToolsConfig &
     InputConfig &
+    OutputConfig &
+    AudioWorkletConfig &
     FormatConfig & {
       serverLocation?: Location | string;
     }
@@ -94,6 +109,12 @@ export type HookCallbacks = Pick<
   | "onDebug"
   | "onUnhandledClientToolCall"
   | "onVadScore"
+  | "onInterruption"
+  | "onAgentToolResponse"
+  | "onConversationMetadata"
+  | "onMCPToolCall"
+  | "onMCPConnectionStatus"
+  | "onAsrInitiationMetadata"
 >;
 
 export function useConversation<T extends HookOptions & ControlledState>(
@@ -105,6 +126,12 @@ export function useConversation<T extends HookOptions & ControlledState>(
   const [status, setStatus] = useState<Status>("disconnected");
   const [canSendFeedback, setCanSendFeedback] = useState(false);
   const [mode, setMode] = useState<Mode>("listening");
+
+  const micMutedRef = useRef<boolean | undefined>(micMuted);
+  const volumeRef = useRef<number | undefined>(volume);
+
+  micMutedRef.current = micMuted;
+  volumeRef.current = volume;
 
   useEffect(() => {
     if (micMuted !== undefined) {
@@ -140,11 +167,13 @@ export function useConversation<T extends HookOptions & ControlledState>(
           options?.serverLocation || serverLocation
         );
         const origin = getOriginForLocation(resolvedServerLocation);
+        const livekitUrl = getLivekitUrlForLocation(resolvedServerLocation);
 
         lockRef.current = Conversation.startSession({
           ...(defaultOptions ?? {}),
           ...(options ?? {}),
           origin,
+          livekitUrl,
           overrides: {
             ...(defaultOptions?.overrides ?? {}),
             ...(options?.overrides ?? {}),
@@ -172,6 +201,21 @@ export function useConversation<T extends HookOptions & ControlledState>(
             options?.onUnhandledClientToolCall ||
             defaultOptions?.onUnhandledClientToolCall,
           onVadScore: options?.onVadScore || defaultOptions?.onVadScore,
+          onInterruption:
+            options?.onInterruption || defaultOptions?.onInterruption,
+          onAgentToolResponse:
+            options?.onAgentToolResponse || defaultOptions?.onAgentToolResponse,
+          onConversationMetadata:
+            options?.onConversationMetadata ||
+            defaultOptions?.onConversationMetadata,
+          onMCPToolCall:
+            options?.onMCPToolCall || defaultOptions?.onMCPToolCall,
+          onMCPConnectionStatus:
+            options?.onMCPConnectionStatus ||
+            defaultOptions?.onMCPConnectionStatus,
+          onAsrInitiationMetadata:
+            options?.onAsrInitiationMetadata ||
+            defaultOptions?.onAsrInitiationMetadata,
           onModeChange: ({ mode }) => {
             setMode(mode);
             (options?.onModeChange || defaultOptions?.onModeChange)?.({ mode });
@@ -192,12 +236,12 @@ export function useConversation<T extends HookOptions & ControlledState>(
         } as Options);
 
         conversationRef.current = await lockRef.current;
-        // Persist controlled state between sessions
-        if (micMuted !== undefined) {
-          conversationRef.current.setMicMuted(micMuted);
+        // Persist controlled state between sessions using refs to get current values
+        if (micMutedRef.current !== undefined) {
+          conversationRef.current.setMicMuted(micMutedRef.current);
         }
-        if (volume !== undefined) {
-          conversationRef.current.setVolume({ volume });
+        if (volumeRef.current !== undefined) {
+          conversationRef.current.setVolume({ volume: volumeRef.current });
         }
 
         return conversationRef.current.getId();

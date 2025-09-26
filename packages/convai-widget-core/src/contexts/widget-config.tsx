@@ -27,6 +27,7 @@ export function WidgetConfigProvider({ children }: WidgetConfigProviderProps) {
   const { serverUrl } = useServerLocation();
   const agentId = useAttribute("agent-id");
   const overrideConfig = useAttribute("override-config");
+  const signedUrl = useAttribute("signed-url");
   const fetchedConfig = useSignal<WidgetConfig | null>(null);
 
   useSignalEffect(() => {
@@ -43,14 +44,21 @@ export function WidgetConfigProvider({ children }: WidgetConfigProviderProps) {
         );
       }
     }
+    let currentAgentId: string | undefined = agentId.value;
+    let conversationSignature: string | undefined;
+    if (signedUrl.value) {
+      const params = new URL(signedUrl.value).searchParams;
+      currentAgentId = params.get('agent_id') ?? agentId.value;
+      conversationSignature = params.get('conversation_signature') ?? undefined;
+    }
 
-    if (!agentId.value) {
+    if (!currentAgentId) {
       fetchedConfig.value = null;
       return;
     }
 
     const abort = new AbortController();
-    fetchConfig(agentId.value, serverUrl.value, abort.signal)
+    fetchConfig(currentAgentId, serverUrl.value, abort.signal, conversationSignature)
       .then(config => {
         if (!abort.signal.aborted) {
           fetchedConfig.value = config;
@@ -178,10 +186,11 @@ export function useWebRTC() {
 async function fetchConfig(
   agentId: string,
   serverUrl: string,
-  signal: AbortSignal
+  signal: AbortSignal,
+  conversationSignature?: string
 ): Promise<WidgetConfig> {
   const response = await fetch(
-    `${serverUrl}/v1/convai/agents/${agentId}/widget`,
+    `${serverUrl}/v1/convai/agents/${agentId}/widget${conversationSignature ? `?conversation_signature=${encodeURIComponent(conversationSignature)}` : ''}`,
     {
       signal,
     }

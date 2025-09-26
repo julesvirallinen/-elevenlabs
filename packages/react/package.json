@@ -1,6 +1,6 @@
 {
   "name": "@elevenlabs/react",
-  "version": "0.6.1",
+  "version": "0.6.4",
   "description": "ElevenLabs React Library",
   "main": "./dist/lib.umd.js",
   "module": "./dist/lib.module.js",
@@ -21,8 +21,8 @@
     "build": "BROWSERSLIST_ENV=modern microbundle --jsx React.createElement --jsxFragment React.Fragment --jsxImportSource react src/index.ts",
     "clean": "rm -rf ./dist",
     "dev": "pnpm run clean && pnpm run generate-version && BROWSERSLIST_ENV=development microbundle --jsx React.createElement --jsxFragment React.Fragment --jsxImportSource react src/index.ts -w -f modern",
-    "lint": "pnpm run lint:ts && pnpm run lint:es && pnpm run lint:prettier",
-    "lint:ts": "tsc --noEmit --skipLibCheck",
+    "lint": "pnpm run check-types && pnpm run lint:es && pnpm run lint:prettier",
+    "check-types": "tsc --noEmit --skipLibCheck",
     "lint:es": "pnpm exec eslint .",
     "lint:prettier": "prettier 'src/**/*.ts' --check",
     "prepublishOnly": "pnpm run build",
@@ -49,5 +49,8 @@
     "type": "git",
     "url": "git+https://github.com/elevenlabs/packages.git",
     "directory": "packages/react"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
